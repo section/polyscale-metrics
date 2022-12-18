@@ -45,7 +45,7 @@ No substitutions are required in the Service resource, so just apply:
 $ kubectl apply -f polyscale-metrics-service.yaml
 ```
 
-Substitute YOUR_CACHE_CONNECTION_STRING, YOUR_ORIGIN_CONNECTION_STRING, and YOUR_QUERY in the Deployment resource and apply:
+Substitute YOUR_CACHE_CONNECTION_STRING, YOUR_ORIGIN_CONNECTION_STRING, and YOUR_QUERY in the Deployment resource. YOUR_QUERY can be something as simple as ```select * from shoppinglist limit 1;```, as long as the table exists. The actual contents of the row is not important. Then apply:
 
 ```
 $ kubectl apply -f polyscale-metrics-deployment.yaml
