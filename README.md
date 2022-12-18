@@ -6,28 +6,38 @@ This is a testing app that executes a query from every Section location to which
 ### Grafana Agent
 First deploy the ConfigMap. Replace items in the remote_write section:
 
+```
     remote_write:
     - url: GRAFANA_METRICS_INSTANCE_REMOTE_WRITE_ENDPOINT
       basic_auth:
         username: GRAFANA_METRICS_INSTANCE_ID
         password: GRAFANA_API_KEY
+```
 
 And apply:
 
+```
 $ kubectl apply -f grafana-app-scrape-configmap.yaml
+```
 
 In the Deployment resource no substitutions required. So just apply:
 
+```
 $ kubectl apply -f grafana-app-agent-deployment.yaml
+```
 
 ### Polyscale Metrics App
 No substitutions are required in the Service resource, so just apply:
 
+```
 $ kubectl apply -f polyscale-metrics-service.yaml
+```
 
 Substitute YOUR_CACHE_CONNECTION_STRING, YOUR_ORIGIN_CONNECTION_STRING, and YOUR_QUERY in the Deployment resource and apply:
 
+```
 $ kubectl apply -f polyscale-metrics-deployment.yaml
+```
 
 ## Checking the Logs
 In the following example I'm using a location optimizer config that has my Section Project running in 5 locations around the world.
