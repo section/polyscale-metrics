@@ -54,7 +54,7 @@ func dbSetup() {
 	}
 }
 
-func dbQuery(pop string, latenciesVec *prometheus.SummaryVec, conn *pgx.Conn, which string) {
+func dbQuery(pop string, latenciesVec *prometheus.SummaryVec, conn *pgx.Conn, which string, query string) {
 	var orderdate, region, city, category string
 	var product string
 	var qty int64
@@ -62,7 +62,7 @@ func dbQuery(pop string, latenciesVec *prometheus.SummaryVec, conn *pgx.Conn, wh
 
 	// Time the query
 	start := time.Now()
-	rows, err := conn.Query(context.Background(), "select * from foodsales limit 1;")
+	rows, err := conn.Query(context.Background(), query)
 	duration := time.Since(start)
 
 	if err != nil {
@@ -92,14 +92,14 @@ func scanRecord(rows pgx.Rows, err error, orderdate string, region string, city 
 	return err, false
 }
 
-func recordMetricsForever(pop string, intervalSeconds int) {
+func recordMetricsForever(pop string, intervalSeconds int, query string) {
 	queriesProcessed := queriesProcessedVec.WithLabelValues(pop)
 	for {
 		queriesProcessed.Inc()
 		myCounter++
 		fmt.Print("nodename ", pop, " ")
-		dbQuery(pop, CacheLatenciesVec, CacheConn, "cache")
-		dbQuery(pop, OriginLatenciesVec, OriginConn, "origin")
+		dbQuery(pop, CacheLatenciesVec, CacheConn, "cache", query)
+		dbQuery(pop, OriginLatenciesVec, OriginConn, "origin", query)
 		fmt.Println()
 		time.Sleep(time.Duration(intervalSeconds) * time.Second)
 	}
@@ -109,10 +109,7 @@ func main() {
 	metricsPort := ":2112"
 	intervalSeconds := 60 // Default
 
-	dbSetup()
-
 	nodeName := os.Getenv("NODE_NAME") // Node name provided by deployment yaml
-
 	if nodeName == "" {
 		nodeName = "local"
 	}
@@ -124,9 +121,18 @@ func main() {
 			intervalSeconds = 60
 		}
 	}
+
+	query := os.Getenv("QUERY")
+	if query == "" {
+		fmt.Fprintf(os.Stderr, "QUERY needs to be specified as an environment variable.\n")
+		os.Exit(1)
+	}
+
 	metricsEndpoint := "/metrics"
-	go recordMetricsForever(nodeName, intervalSeconds)
+	fmt.Println("Node", nodeName, "listening to", metricsEndpoint, "on port", metricsPort, "interval", intervalSeconds, "s", "query", query)
+
+	dbSetup()
+	go recordMetricsForever(nodeName, intervalSeconds, query)
 	http.Handle(metricsEndpoint, promhttp.Handler())
-	fmt.Println("Node", nodeName, "listening to", metricsEndpoint, "on port", metricsPort, "interval", intervalSeconds, "s")
 	http.ListenAndServe(metricsPort, nil)
 }

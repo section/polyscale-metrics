@@ -27,6 +27,8 @@ spec:
             value: YOUR_CACHE_CONNECTION_STRING
           - name: ORIGIN_DATABASE_URL
             value: YOUR_ORIGIN_CONNECTION_STRING
+          - name: QUERY
+            value: YOUR_QUERY
         resources:
           requests:
             memory: ".2Gi"
