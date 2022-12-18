@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: polyscale-metrics
+  labels:
+    app: polyscale-metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: polyscale-metrics
+  template:
+    metadata:
+      labels:
+        app: polyscale-metrics
+    spec:
+      containers:
+      - name: polyscale-metrics
+        image: ghcr.io/section/polyscale-metrics
+        imagePullPolicy: Always
+        env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName        
+          - name: CACHE_DATABASE_URL
+            value: YOUR_CACHE_CONNECTION_STRING
+          - name: ORIGIN_DATABASE_URL
+            value: YOUR_ORIGIN_CONNECTION_STRING
+        resources:
+          requests:
+            memory: ".2Gi"
+            cpu: "200m"
+          limits:
+            memory: ".2Gi"
+            cpu: "200m"
+        ports:
+        - containerPort: 80

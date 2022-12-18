@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-app-agent-config
+data:
+  prometheus.yml: |
+    # my global config
+    global:
+      scrape_interval:     60s
+
+      # Attach these labels to any time series or alerts when communicating with
+      # external systems (federation, remote storage, Alertmanager).
+      external_labels:
+          monitor: 'polyscale-metrics-monitor'
+
+    # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+    rule_files:
+      # - "first.rules"
+      # - "second.rules"
+
+    # A scrape configuration containing exactly one endpoint to scrape:
+    # Here it's Prometheus itself.
+    scrape_configs:
+      # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+      - job_name: 'polyscale-metrics-job'
+        params:
+          'match[]':
+            - '{__name__=~".+"}'      
+        scheme: 'http'
+        static_configs:
+          - targets: ['polyscale-metrics-service:80']
+    remote_write:
+    - url: GRAFANA_METRICS_INSTANCE_REMOTE_WRITE_ENDPOINT
+      basic_auth:
+        username: GRAFANA_METRICS_INSTANCE_ID
+        password: GRAFANA_API_KEY
