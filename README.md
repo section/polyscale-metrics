@@ -1,5 +1,5 @@
 # Polyscale Metrics
-This is a testing app that executes a query:
+This is a performance testing app that executes a query:
 - from every Section location to which it is deployed,
 - into a [Polyscale.ai](https://polyscale.ai) cache,
 - and then in-turn into an origin database for any cache misses.
