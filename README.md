@@ -32,6 +32,7 @@ $ kubectl apply -f polyscale-metrics-deployment.yaml
 ## Checking the Logs
 In the following example I'm using a location optimizer config that has my Section Project running in 5 locations around the world.
 
+```
 $ kubectl --kubeconfig kubeconfig get pods -o wide
 NAME                                 READY   STATUS    RESTARTS   AGE     IP               NODE        NOMINATED NODE   READINESS GATES
 grafana-app-agent-66d6fffdf-78xdf    1/1     Running   0          36m     10.244.49.34     atl-bgaun   <none>           <none>
@@ -44,11 +45,14 @@ polyscale-metrics-77555d94b8-w8fqr   1/1     Running   0          2m18s   10.244
 polyscale-metrics-77555d94b8-2gkf9   1/1     Running   0          2m19s   10.244.23.249    sin-dhl6s   <none>           <none>
 polyscale-metrics-77555d94b8-sklh4   1/1     Running   0          2m18s   10.244.71.98     syd-3pl5y   <none>           <none>
 polyscale-metrics-77555d94b8-8w5mg   1/1     Running   0          2m18s   10.244.120.117   rio-kz6s3   <none>           <none>
+```
 
 Looking at the logs from one of those pods shows great cache response as compared to the origin.
 
+```
 $ kubectl --kubeconfig kubeconfig logs polyscale-metrics-77555d94b8-96772
 Node lmn-atl-k1-shared-ingress5 listening to /metrics on port :2112 interval 60 s query select * from foodsales limit 1;
 nodename lmn-atl-k1-shared-ingress5 cache 241ms origin 416ms 
 nodename lmn-atl-k1-shared-ingress5 cache 11ms origin 207ms 
 nodename lmn-atl-k1-shared-ingress5 cache 11ms origin 208ms 
+```
