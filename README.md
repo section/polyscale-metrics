@@ -1,11 +1,14 @@
 # Polyscale Metrics
 This is a testing app that executes a query:
 - from every Section location to which it is deployed,
-- into a Polyscale.ai cache,
+- into a [Polyscale.ai](https://polyscale.ai) cache,
 - and then in-turn into an origin database for any cache misses.
 By default the query executes every 60 seconds and emits a log entry, which we'll show below. The app also exposes a metrics endpoint that is scraped by a Grafana agent, and those metrics are then sent to Grafana Cloud. The metrics are the p50, p90, and p95 latencies over time.
 
 There is no need to build the image, we provide one for you on https://ghcr.io/section/polyscale-metrics. The deployment yaml refers to that one. You just need to substitute your secrets and connection strings and deploy the yamls to your Section Project.
+
+## Database Setup
+You'll first need to have a database of some kind, one that is supported by Polyscale. [Supabase](https://supabase.com) is a managed Postgres database we've used before, but any Postgres database will suffice. And then you'll need to setup a cache at [Polyscale.ai](https://polyscale.ai), a managed service with a distributed global database cache.
 
 ## Deployment to Section
 
