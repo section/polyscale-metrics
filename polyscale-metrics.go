@@ -18,11 +18,6 @@ import (
 )
 
 var (
-	myCounter           = 0
-	queriesProcessedVec = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "polyscale_metrics_processed_queries_total",
-		Help: "The total number of processed queries",
-	}, []string{"popname"})
 	CacheLatenciesVec = promauto.NewSummaryVec(prometheus.SummaryOpts{
 		Name:       "polyscale_metrics_latency_cache",
 		Help:       "The latency of queries to the cache",
@@ -43,23 +38,18 @@ func dbSetup() {
 	CacheConn, err = pgx.Connect(context.Background(), urlExample)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to cache database: %v\n", err)
-		os.Exit(1)
+		panic(0)
 	}
 
 	urlExample = os.Getenv("ORIGIN_DATABASE_URL")
 	OriginConn, err = pgx.Connect(context.Background(), urlExample)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to origin database: %v\n", err)
-		os.Exit(1)
+		panic(0)
 	}
 }
 
 func dbQuery(pop string, latenciesVec *prometheus.SummaryVec, conn *pgx.Conn, which string, query string) {
-	var orderdate, region, city, category string
-	var product string
-	var qty int64
-	var unitprice, totalprice float64
-
 	// Time the query
 	start := time.Now()
 	rows, err := conn.Query(context.Background(), query)
@@ -67,7 +57,7 @@ func dbQuery(pop string, latenciesVec *prometheus.SummaryVec, conn *pgx.Conn, wh
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query failed: %v\n", err)
-		os.Exit(1)
+		panic(0)
 	} else {
 		// Log the time in prometheus, only for successful queries
 		latencies := latenciesVec.WithLabelValues(pop)
@@ -75,28 +65,27 @@ func dbQuery(pop string, latenciesVec *prometheus.SummaryVec, conn *pgx.Conn, wh
 	}
 
 	// If we don't scan the row, future queries will be 0ms
-	err, _ = scanRecord(rows, err, orderdate, region, city, category, product, qty, unitprice, totalprice)
+	scan(rows)
 
 	fmt.Print(which, " ", float64(duration.Milliseconds()), "ms ")
 }
 
-func scanRecord(rows pgx.Rows, err error, orderdate string, region string, city string, category string, product string, qty int64, unitprice float64, totalprice float64) (error, bool) {
+func scan(rows pgx.Rows) {
+	var err error
+
 	for rows.Next() {
-		err = rows.Scan(&orderdate, &region, &city, &category, &product, &qty, &unitprice, &totalprice)
+		var v []interface{}
+		v, err = rows.Values()
+		_ = v
 		if err != nil {
-			fmt.Printf("Scan error: %v", err)
-			return nil, true
+			fmt.Fprintf(os.Stderr, "Values failed: %v\n", err)
+			panic(0)
 		}
 	}
-
-	return err, false
 }
 
 func recordMetricsForever(pop string, intervalSeconds int, query string) {
-	queriesProcessed := queriesProcessedVec.WithLabelValues(pop)
 	for {
-		queriesProcessed.Inc()
-		myCounter++
 		fmt.Print("nodename ", pop, " ")
 		dbQuery(pop, CacheLatenciesVec, CacheConn, "cache", query)
 		dbQuery(pop, OriginLatenciesVec, OriginConn, "origin", query)
@@ -113,6 +102,7 @@ func main() {
 	if nodeName == "" {
 		nodeName = "local"
 	}
+
 	interval := os.Getenv("INTERVAL") // Seconds between queries
 	if interval != "" {
 		var err error
@@ -125,7 +115,7 @@ func main() {
 	query := os.Getenv("QUERY")
 	if query == "" {
 		fmt.Fprintf(os.Stderr, "QUERY needs to be specified as an environment variable.\n")
-		os.Exit(1)
+		panic(0)
 	}
 
 	metricsEndpoint := "/metrics"
