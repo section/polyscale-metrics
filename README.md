@@ -1,17 +1,17 @@
-# Polyscale Metrics
+# PolyScale Metrics
 This is a performance testing app that executes a query:
 - from every Section location to which it is deployed,
-- into the nearest [Polyscale.ai](https://polyscale.ai) cache location,
+- into the nearest [PolyScale.ai](https://polyscale.ai) cache location,
 - and then in-turn into an origin database for any cache misses.
 
 By default the query executes every 60 seconds and emits a log entry, which we'll show below. The app also exposes a metrics endpoint that is scraped by a Grafana agent, and those metrics are then sent to Grafana Cloud. The metrics are the p50, p90, and p95 latencies over time.
 
 There is no need to build the image, we provide one for you on https://ghcr.io/section/polyscale-metrics. The deployment yaml refers to that one. You just need to substitute your secrets and connection strings and deploy the yamls to your Section Project.
 
-The Polyscale cache locations are not necessarily the same datacenters as the Section datacenters.
+The PolyScale cache locations are not necessarily the same datacenters as the Section datacenters.
 
 ## Database Setup
-You'll first need to have a database of some kind, one that is supported by Polyscale. [Supabase](https://supabase.com) is a managed Postgres database we've used before, but Polyscale supports a wide variety of databases. And then you'll need to setup a cache at [Polyscale.ai](https://polyscale.ai), a managed service with a distributed global database cache.
+You'll first need to have a database of some kind, one that is supported by PolyScale. [Supabase](https://supabase.com) is a managed Postgres database we've used before, but PolyScale supports a wide variety of databases. And then you'll need to setup a cache at [PolyScale.ai](https://polyscale.ai), a managed service with a distributed global database cache.
 
 ## Deployment to Section
 
@@ -38,7 +38,7 @@ In the Deployment resource no substitutions required. So just apply:
 $ kubectl apply -f grafana-app-agent-deployment.yaml
 ```
 
-### Polyscale Metrics App
+### PolyScale Metrics App
 No substitutions are required in the Service resource, so just apply:
 
 ```

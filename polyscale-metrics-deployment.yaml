@@ -24,9 +24,9 @@ spec:
               fieldRef:
                 fieldPath: spec.nodeName        
           - name: CACHE_DATABASE_URL
-            value: YOUR_CACHE_CONNECTION_STRING
+            value: YOUR_CACHE_DATABASE_URL
           - name: ORIGIN_DATABASE_URL
-            value: YOUR_ORIGIN_CONNECTION_STRING
+            value: YOUR_ORIGIN_DATABASE_URL
           - name: QUERY
             value: YOUR_QUERY
         resources:
